@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id        Int        @id @default(autoincrement())
+  userName  String
+  email     String
+  createdAt DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt DateTime   @default(now()) @db.Timestamp(0)
+  pwd       String
+  role      String     @default("user")
+  image     Bytes?
+  Expenses  Expenses[]
+}
+
+model Expenses {
+  id Int @id(map: "expenses_pkey") @default(autoincrement())
+
+  details    String   @default("New Expense")
+  createdAt  DateTime @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime @default(now()) @db.Timestamp(0)
+  expensedAt DateTime @default(now()) @db.Date
+  loanMonths Int      @default(0)
+  amount     Decimal  @default(0) @db.Decimal(12, 2)
+  isMonthly  Boolean  @default(false)
+
+  store   Store @relation(fields: [storeId], references: [id])
+  storeId Int   @default(0)
+
+  user   Users @relation(fields: [userId], references: [id])
+  userId Int   @default(0)
+
+  payment   Payments @relation(fields: [paymentId], references: [id])
+  paymentId Int      @default(0)
+
+  category   Categories @relation(fields: [categoryId], references: [id])
+  categoryId Int        @default(0)
+}
+
+model Categories {
+  id        Int        @id(map: "categories_pkey") @default(autoincrement())
+  name      String
+  createdAt DateTime   @default(now()) @db.Timestamp(0)
+  userId    Int        @default(0)
+  Expenses  Expenses[]
+}
+
+model CostLevels {
+  id        Int      @id(map: "levels_pkey") @default(autoincrement())
+  name      String
+  amount    Decimal  @default(0) @db.Decimal(14, 2)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  userId    Int      @default(0)
+}
+
+model Payments {
+  id        Int        @id(map: "payments_pkey") @default(autoincrement())
+  name      String
+  createdAt DateTime   @default(now()) @db.Timestamp(0)
+  loan      Boolean    @default(false)
+  userId    Int        @default(0)
+  icon      String?
+  Expenses  Expenses[]
+}
+
+model Store {
+  id          Int        @id(map: "store_pkey") @default(autoincrement())
+  name        String
+  createdAt   DateTime   @default(now()) @db.Timestamp(0)
+  userId      Int        @default(0)
+  storeTypeId Int        @default(0)
+  icon        String?
+  Expenses    Expenses[]
+}
+
+model StoreType {
+  id        Int      @id(map: "store_type_pkey") @default(autoincrement())
+  name      String
+  createdAt DateTime @db.Timestamp(0)
+}
